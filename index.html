@@ -1,28 +1,209 @@
-<!DOCTYPE html>
+
+       <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Guessing Game</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Glassmorphic Word Guess</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;600;800&display=swap');
+
+        body {
+            margin: 0;
+            height: 100vh;
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .glass-card {
+            width: 420px;
+            padding: 35px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.28);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            margin: 0;
+            margin-bottom: 15px;
+            font-weight: 800;
+            font-size: 30px;
+            color: #ffffff;
+            text-shadow: 0 3px 8px rgba(255, 255, 255, 0.4);
+        }
+
+        .hint-box {
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #4b4b4b;
+            font-size: 15px;
+        }
+
+        .word-display {
+            font-size: 36px;
+            font-weight: bold;
+            letter-spacing: 14px;
+            margin: 20px 0;
+            color: #ffffff;
+            text-shadow: 0 4px 10px rgba(255, 255, 255, 0.6);
+        }
+
+        input {
+            padding: 12px;
+            width: 160px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            text-align: center;
+            font-size: 18px;
+            margin-top: 5px;
+            background: rgba(255, 255, 255, 0.6);
+            color: #444;
+            font-weight: 600;
+        }
+
+        button {
+            padding: 12px 24px;
+            margin-top: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            color: #fff;
+        }
+
+        .guess-btn {
+            background: #6a4df5;
+            box-shadow: 0 4px 15px rgba(106, 77, 245, 0.5);
+        }
+
+        .guess-btn:hover {
+            background: #563de0;
+            transform: scale(1.05);
+        }
+
+        .reset-btn {
+            background: #ff5c8a;
+            box-shadow: 0 4px 15px rgba(255, 92, 138, 0.5);
+            margin-top: 20px;
+        }
+
+        .reset-btn:hover {
+            background: #ff326c;
+            transform: scale(1.05);
+        }
+
+        #wrongLetters {
+            color: #ff3e6c;
+            font-weight: 700;
+            text-shadow: 0 3px 6px rgba(255, 92, 138, 0.7);
+        }
+    </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Word Guessing Game</h1>
-        <p>Guess the word letter by letter!</p>
+
+    <div class="glass-card">
+        <h1>Word Guess ❄️</h1>
+
+        <div class="hint-box">
+            <strong>Hint:</strong> <span id="hint"></span>
+        </div>
 
         <div id="wordDisplay" class="word-display"></div>
 
-        <p>Incorrect guesses: <span id="wrongGuesses">0</span></p>
-        <p>Letters guessed: <span id="guessedLetters">None</span></p>
-
         <input type="text" id="letterInput" maxlength="1" placeholder="Enter a letter">
-        <button id="guessBtn">Guess</button>
+        <br>
+        <button onclick="guessLetter()" class="guess-btn">Guess</button>
 
-        <p id="message"></p>
-        <button id="restartBtn">Restart Game</button>
+        <p>Wrong guesses: <span id="wrongLetters"></span></p>
+
+        <button onclick="resetGame()" class="reset-btn">Restart</button>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        const words = [
+            { word: "sunrise", hint: "The start of a new day" },
+            { word: "rainbow", hint: "Colorful arc in the sky" },
+            { word: "crystal", hint: "Shiny transparent mineral" },
+            { word: "feather", hint: "Soft bird covering" },
+            { word: "island", hint: "Land surrounded by water" },
+            { word: "dreamer", hint: "One who imagines big things" }
+        ];
+
+        let chosenWord, hintText, displayWord, wrongGuesses;
+
+        function startGame() {
+            const randomIndex = Math.floor(Math.random() * words.length);
+            chosenWord = words[randomIndex].word;
+            hintText = words[randomIndex].hint;
+
+            displayWord = Array(chosenWord.length).fill("_");
+            wrongGuesses = [];
+
+            document.getElementById("hint").innerText = hintText;
+            document.getElementById("wordDisplay").innerText = displayWord.join(" ");
+            document.getElementById("wrongLetters").innerText = "";
+        }
+
+        function guessLetter() {
+            const input = document.getElementById("letterInput");
+            const letter = input.value.toLowerCase();
+            input.value = "";
+
+            if (!letter.match(/[a-z]/) || letter.length !== 1) {
+                alert("Enter a single valid letter.");
+                return;
+            }
+
+            if (displayWord.includes(letter) || wrongGuesses.includes(letter)) {
+                alert("You already guessed that letter!");
+                return;
+            }
+
+            let found = false;
+            for (let i = 0; i < chosenWord.length; i++) {
+                if (chosenWord[i] === letter) {
+                    displayWord[i] = letter;
+                    found = true;
+                }
+            }
+
+            if (!found) wrongGuesses.push(letter);
+
+            document.getElementById("wordDisplay").innerText = displayWord.join(" ");
+            document.getElementById("wrongLetters").innerText = wrongGuesses.join(", ");
+
+            if (!displayWord.includes("_")) {
+                alert("✨ Congratulations! You guessed the word: " + chosenWord.toUpperCase());
+            }
+        }
+
+        function resetGame() {
+            startGame();
+        }
+
+        startGame();
+    </script>
+
 </body>
 </html>
